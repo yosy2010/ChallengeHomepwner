@@ -10,6 +10,11 @@
 #import "BNRItemStore.h"
 #import "BNRItem.h"
 
+@interface BNRItemsViewController ()
+
+@property (nonatomic, strong) IBOutlet UIView *headerView;
+
+@end
 
 @implementation BNRItemsViewController
 
@@ -37,6 +42,7 @@
     return [self init];
 }
 
+
 - (void)viewDidLoad
 {
     // call super view did load
@@ -45,8 +51,12 @@
     // set the table view identifier to be reused
     [self.tableView registerClass:[UITableViewCell class]
            forCellReuseIdentifier:@"UITableViewCell"];
+    
+    // set the header for the tableView
+    self.tableView.tableHeaderView = self.headerView;
 }
 
+// set the number of rws in each section
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
 //    BNRItemStore *store = [BNRItemStore sharedStore];
@@ -75,5 +85,27 @@
     return cell;
 }
 
+// override the headerView getter
+- (UIView *)headerView
+{
+    // if the header not loaded yet, load it into the view
+    if (!_headerView) {
+        _headerView = [[NSBundle mainBundle] loadNibNamed:@"Header"
+                                                    owner:self
+                                                  options:nil].firstObject;
+    }
+    
+    return _headerView;
+}
+
+- (IBAction)addNewItem:(id)sender
+{
+    
+}
+
+- (IBAction)toggleEditingMode:(id)sender
+{
+    
+}
 
 @end
