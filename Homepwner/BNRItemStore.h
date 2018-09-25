@@ -20,6 +20,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)sharedStore;
 
 - (BNRItem *)createItem; // this will create a random item
+- (void)removeItem: (BNRItem *)item;
+- (void)moveItemAtIndex:(NSUInteger)fromIndex toIndex:(NSUInteger)toIndex;
 
 @end
 

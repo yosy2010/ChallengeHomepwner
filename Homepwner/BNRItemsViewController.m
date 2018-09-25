@@ -13,7 +13,7 @@
 @interface BNRItemsViewController ()
 
 @property (nonatomic, strong) IBOutlet UIView *headerView;
-
+@property (nonatomic, weak) IBOutlet UIButton *editButton; // so I can change its title inside methods that doesn't have sender
 @end
 
 @implementation BNRItemsViewController
@@ -23,15 +23,9 @@
 {
     // call the designated initilizer
     self = [super initWithStyle:UITableViewStylePlain];
-    
     if (self) {
         
-        // create 5 itemes and put them in the store
-        for (int i = 0; i < 5; i++) {
-            [[BNRItemStore sharedStore] createItem];
-        }
     }
-    
     return self;
 }
 
@@ -98,14 +92,71 @@
     return _headerView;
 }
 
+// new button
 - (IBAction)addNewItem:(id)sender
 {
+    // create a new item and added it to the store
+    BNRItem *newItem = [[BNRItemStore sharedStore] createItem];
+    
+    // get the position of that item in the array of items in the store
+    NSInteger lastRow = [[[BNRItemStore sharedStore] allItems] indexOfObject:newItem];
+    
+    // create an array because the method that adds the rwo expect an array of indexPaths, so we created an array of one item only to pass
+    NSArray *indexPaths = @[[NSIndexPath indexPathForRow:lastRow inSection:0]];
+    
+    // insert the row
+    [self.tableView insertRowsAtIndexPaths:indexPaths
+                          withRowAnimation:UITableViewRowAnimationTop];
+}
+
+// edit button
+- (IBAction)toggleEditingMode:(id)sender
+{
+    // is it on edition mode? change it and change the text to Edit
+    if (self.isEditing) {
+        [self setEditing:NO animated:YES];
+        [self.editButton setTitle:@"Edit" forState:UIControlStateNormal];
+      // not in editing mode? then make it, and change the text to Done
+    } else {
+        [self setEditing:YES animated:YES];
+        [self.editButton setTitle:@"Done" forState:UIControlStateNormal];
+    }
+}
+
+// when in editing mode and the user press a button (delete ot edit)
+// here the method provide to us the index path and the editing style
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+ 
+    // if the user hit delete
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+        // get all the items in the store
+        NSArray *items = [[BNRItemStore sharedStore] allItems];
+        
+        // get the item form the row
+        // this will get us the item because the shred store and the rows are orgnized in the same order
+        BNRItem *item = items[indexPath.row];
+        
+        // delete it from the store
+        [[BNRItemStore sharedStore] removeItem:item];
+        
+        // put the index path in an array so we can pass it to the deleteing method after
+        NSArray *indexPaths = @[indexPath];
+        
+        // delete it from the row
+        [tableView deleteRowsAtIndexPaths:indexPaths withRowAnimation:YES];
+        
+        // change the editing mode and text
+        [self setEditing:NO animated:YES];
+        [self.editButton setTitle:@"Edit" forState:UIControlStateNormal];
+    }
     
 }
 
-- (IBAction)toggleEditingMode:(id)sender
+// when the rows positions are moved, this method tell the data source about it
+- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)sourceIndexPath toIndexPath:(NSIndexPath *)destinationIndexPath
 {
-    
+    [[BNRItemStore sharedStore] moveItemAtIndex:sourceIndexPath.row toIndex:destinationIndexPath.row];
 }
 
 @end
