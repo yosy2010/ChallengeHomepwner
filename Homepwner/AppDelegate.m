@@ -21,9 +21,12 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.backgroundColor = [UIColor whiteColor];
     
-    // create the table view controller and set as the root viiew
+    // create the table view controller to be added as the root view of the navigationController
     BNRItemsViewController *itemsViewController = [[BNRItemsViewController alloc] init];
-    self.window.rootViewController = itemsViewController;
+    
+    // create a UINavigationController andd add it as the root view of the window
+    UINavigationController *navController = [[UINavigationController alloc]initWithRootViewController:itemsViewController];
+    self.window.rootViewController = navController;
     
     // show the viee
     [self.window makeKeyAndVisible];

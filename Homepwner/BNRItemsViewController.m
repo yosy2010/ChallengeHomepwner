@@ -9,6 +9,7 @@
 #import "BNRItemsViewController.h"
 #import "BNRItemStore.h"
 #import "BNRItem.h"
+#import "BNRDetailViewController.h"
 
 @interface BNRItemsViewController ()
 
@@ -91,7 +92,7 @@
     
     return _headerView;
 }
-
+//٢٥٦٤٣٤
 // new button
 - (IBAction)addNewItem:(id)sender
 {
@@ -157,6 +158,24 @@
 - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)sourceIndexPath toIndexPath:(NSIndexPath *)destinationIndexPath
 {
     [[BNRItemStore sharedStore] moveItemAtIndex:sourceIndexPath.row toIndex:destinationIndexPath.row];
+}
+
+// called when a user tab in an item in the table
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    // wehn the user tab on an item, we should create the detaik controller
+    BNRDetailViewController *detailViewController = [[BNRDetailViewController alloc]init];
+    
+    // get the item selected
+    NSArray *items = [[BNRItemStore sharedStore]allItems];
+    BNRItem *selectedItem = items[indexPath.row];
+    
+    // pass the pointer to the detail view controller
+    detailViewController.item = selectedItem;
+    
+    // push into the detail view controller
+    [self.navigationController pushViewController:detailViewController animated:YES];
+    
 }
 
 @end
