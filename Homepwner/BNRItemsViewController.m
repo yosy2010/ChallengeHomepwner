@@ -13,8 +13,8 @@
 
 @interface BNRItemsViewController ()
 
-@property (nonatomic, strong) IBOutlet UIView *headerView;
 @property (nonatomic, weak) IBOutlet UIButton *editButton; // so I can change its title inside methods that doesn't have sender
+
 @end
 
 @implementation BNRItemsViewController
@@ -25,6 +25,20 @@
     // call the designated initilizer
     self = [super initWithStyle:UITableViewStylePlain];
     if (self) {
+        // set the title of the navigation bar using the navigation item
+        self.navigationItem.title = @"Homepwner";
+        
+        // create a bar button item that fills the bar button
+        UIBarButtonItem *barButoonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd
+                                                                                       target:self
+                                                                                       action:@selector(addNewItem:)];
+        
+        // set to the rigght button
+        self.navigationItem.rightBarButtonItem = barButoonItem;
+        
+        // add the left edit button, this line is built in the UIViewController as a property
+        self.navigationItem.leftBarButtonItem = self.editButtonItem;
+        
         
     }
     return self;
@@ -37,6 +51,10 @@
     return [self init];
 }
 
+- (void)viewWillAppear:(BOOL)animated
+{
+    [self.tableView reloadData];
+}
 
 - (void)viewDidLoad
 {
@@ -46,9 +64,8 @@
     // set the table view identifier to be reused
     [self.tableView registerClass:[UITableViewCell class]
            forCellReuseIdentifier:@"UITableViewCell"];
+
     
-    // set the header for the tableView
-    self.tableView.tableHeaderView = self.headerView;
 }
 
 // set the number of rws in each section
@@ -80,20 +97,7 @@
     return cell;
 }
 
-// override the headerView getter
-- (UIView *)headerView
-{
-    // if the header not loaded yet, load it into the view
-    if (!_headerView) {
-        _headerView = [[NSBundle mainBundle] loadNibNamed:@"Header"
-                                                    owner:self
-                                                  options:nil].firstObject;
-    }
-    
-    return _headerView;
-}
-//٢٥٦٤٣٤
-// new button
+// new button in navigation bar
 - (IBAction)addNewItem:(id)sender
 {
     // create a new item and added it to the store
@@ -108,20 +112,6 @@
     // insert the row
     [self.tableView insertRowsAtIndexPaths:indexPaths
                           withRowAnimation:UITableViewRowAnimationTop];
-}
-
-// edit button
-- (IBAction)toggleEditingMode:(id)sender
-{
-    // is it on edition mode? change it and change the text to Edit
-    if (self.isEditing) {
-        [self setEditing:NO animated:YES];
-        [self.editButton setTitle:@"Edit" forState:UIControlStateNormal];
-      // not in editing mode? then make it, and change the text to Done
-    } else {
-        [self setEditing:YES animated:YES];
-        [self.editButton setTitle:@"Done" forState:UIControlStateNormal];
-    }
 }
 
 // when in editing mode and the user press a button (delete ot edit)
