@@ -8,37 +8,22 @@
 
 #import "BNRDetailViewController.h"
 #import "BNRItem.h"
+#import "BNRImageStore.h"
 
-@interface BNRDetailViewController ()
+
+@interface BNRDetailViewController () <UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate>
 
 // we connnect only the stuff that we need as varibles in our code
 @property (weak, nonatomic) IBOutlet UITextField *nameFeild;
 @property (weak, nonatomic) IBOutlet UITextField *serialFeild;
 @property (weak, nonatomic) IBOutlet UITextField *valueFeild;
 @property (weak, nonatomic) IBOutlet UILabel *dateLabel;
+@property (weak, nonatomic) IBOutlet UIImageView *imageView;
+@property (weak, nonatomic) IBOutlet UIToolbar *toolbar;
 
 @end
 
 @implementation BNRDetailViewController
-
-// to implement the "DONE" bar button to dismiss the keyboard
-- (void)viewDidLoad
-{
-    // create a bar button to dismiss the keyboard
-    UIBarButtonItem *doneBarButton = [[UIBarButtonItem alloc] initWithTitle:@"Done"
-                                                                      style:UIBarButtonItemStyleDone target:self
-                                                                     action:@selector(cancelKeyboard:)];
-    
-    // set it to the right bar button
-    self.navigationItem.rightBarButtonItem = doneBarButton;
-}
-
-// prepare before using
-- (void)viewDidAppear:(BOOL)animated
-{
-    [super viewDidAppear:animated];
-    
-}
 
 // override to set the properties of the detail view controller to the passed BNRItem
 - (void)viewWillAppear:(BOOL)animated
@@ -52,6 +37,7 @@
     self.nameFeild.text = item.itemName;
     self.serialFeild.text = item.serialNumber;
     self.valueFeild.text = [NSString stringWithFormat:@"%d",item.valueInDollars];
+    self.imageView.image = [[BNRImageStore SharedStore] imageforKey:self.item.itemKey];
    
     // convert the date into a string
     static NSDateFormatter *formatter = nil;
@@ -78,6 +64,29 @@
     self.item.itemName = self.nameFeild.text;
     self.item.serialNumber = self.serialFeild.text;
     self.item.valueInDollars = [self.valueFeild.text intValue];
+    
+}
+
+// take picture button
+- (IBAction)takePicture:(id)sender
+{
+    // create a UIImagePickerController instance
+    UIImagePickerController *imagePickerController = [[UIImagePickerController alloc]init];
+    
+    // if the phone has camera, then go there, if it doesn't then show photo library
+    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
+        imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
+    } else {
+        imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+    }
+    
+    // set the delegate
+    imagePickerController.delegate = self;
+    
+    // go there
+    [self presentViewController:imagePickerController
+                       animated:YES
+                     completion:nil];
 }
 
 // override settter method for item to set the title of the view controller to the name of the item
@@ -87,11 +96,35 @@
     self.navigationItem.title = _item.itemName;
 }
 
-// to dismess the keyboard when the user hit done on the tool bar
--(IBAction)cancelKeyboard:(id)sender
+// after the user chose the picture, this method will get called
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<UIImagePickerControllerInfoKey,id> *)info
 {
-    // [self view] give the view that the controller is manging right now, [endEditing:YES]; to end the editing of the current view
-    // in our case we want to dismess the keyboard
-    [[self view] endEditing:YES];
+    // get the picked image from the info dictionary
+    UIImage *pickedImage = info[UIImagePickerControllerOriginalImage];
+    
+    // place it in the detail page
+    self.imageView.image = pickedImage;
+    
+    // save it to the image store using the key of the item
+    [[BNRImageStore SharedStore] setImage:pickedImage
+                                   forKey:self.item.itemKey];
+    
+    // take the image picker of the screen
+    [self dismissViewControllerAnimated:YES
+                             completion:nil];
 }
+
+// this to dismiss the keyboard if the return key is tapped
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    [textField resignFirstResponder];
+    return YES;
+}
+
+// when backGround is tapped, dismiss the keyboard
+- (IBAction)backGroundTapped:(id)sender
+{
+    [self.view endEditing:YES];
+}
+
 @end

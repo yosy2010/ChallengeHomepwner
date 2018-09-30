@@ -7,6 +7,8 @@
 //
 
 #import "BNRItem.h"
+#import "BNRImageStore.h"
+
 
 @implementation BNRItem
 
@@ -60,6 +62,12 @@
         _valueInDollars = valueInDollars;
         _serialNumber = serialNumber;
         _dateCreated = [[NSDate alloc] init];
+        
+        // create an NSUUID object
+        NSUUID *uuid = [[NSUUID alloc]init];
+        
+        // set it to the items key
+        _itemKey = [uuid UUIDString];
     }
     
     
